@@ -1,4 +1,6 @@
 on:
+  push:                # <--- THÊM PHẦN NÀY
+    branches: ["**"]   # Chạy trên mọi branch
   pull_request:
     branches: [master]
 
