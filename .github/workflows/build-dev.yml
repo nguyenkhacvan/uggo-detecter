@@ -1,56 +1,35 @@
-name: Build Dev Binaries
+# File: .github/workflows/build-dev.yml
+name: Build Windows App
 
 on:
   push:
-    branches: ["**"]  # Chạy trên mọi nhánh
+    branches: ["**"]      # Tự động chạy khi bạn push code mới
+  workflow_dispatch:      # <--- QUAN TRỌNG: Cho phép bấm nút chạy thủ công
 
 env:
-  SCCACHE_GHA_ENABLED: true
-  RUSTC_WRAPPER: sccache
+  CARGO_TERM_COLOR: always
 
 jobs:
-  build_artifacts:
-    name: Build Artifacts
-    strategy:
-      matrix:
-        os: [windows-latest] # Chỉ giữ windows nếu bạn chỉ cần exe
-    runs-on: ${{ matrix.os }}
+  build-windows:
+    name: Build uggo.exe
+    runs-on: windows-latest
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - id: toolchain
-        uses: dtolnay/rust-toolchain@stable
+      - name: Setup Rust Cache
+        # Giúp build nhanh hơn ở các lần sau
+        uses: Swatinem/rust-cache@v2
 
-      - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Get Version & Triple
-        id: vars
-        shell: bash
-        run: |
-          echo "version=$(cargo pkgid --package uggo | cut -d# -f2 | cut -d: -f2)" >> $GITHUB_OUTPUT
-          echo "triple=$(rustc -vV | sed -n 's|host: ||p')" >> $GITHUB_OUTPUT
-
-      - name: Build Release
+      - name: Build Release (Tối ưu hóa)
+        # Lệnh biên dịch chính
         run: cargo build --package uggo --release
 
-      - name: Rename & Prepare Artifacts
-        shell: bash
-        run: |
-          npm install -g move-file-cli mkdirp
-          mkdirp artifacts
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            move-file target/release/uggo.exe artifacts/uggo-${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.triple }}.exe
-          else
-            move-file target/release/uggo artifacts/uggo-${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.triple }}
-          fi
-
       - name: Upload Artifact
+        # Tải file exe lên để bạn tải về
         uses: actions/upload-artifact@v4
         with:
-          name: uggo-${{ matrix.os }}
-          path: artifacts/*
+          name: uggo-windows-exe
+          path: target/release/uggo.exe
+          if-no-files-found: error
