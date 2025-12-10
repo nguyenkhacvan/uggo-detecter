@@ -1,0 +1,59 @@
+name: Build Dev Binaries
+
+on:
+  push:
+    branches: ["**"]  # Chạy trên mọi branch khi có push
+
+env:
+  SCCACHE_GHA_ENABLED: true
+  RUSTC_WRAPPER: sccache
+
+jobs:
+  build_artifacts:
+    name: Build Artifacts
+    strategy:
+      matrix:
+        # Bạn có thể bỏ bớt OS nếu không cần thiết để tiết kiệm thời gian
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - id: toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      # Cài Node để dùng tool rename file (giữ giống cấu trúc dự án gốc)
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Get Version & Triple
+        id: vars
+        run: |
+          echo "version=$(cargo pkgid --package uggo | cut -d# -f2 | cut -d: -f2)" >> $GITHUB_OUTPUT
+          echo "triple=$(rustc -vV | sed -n 's|host: ||p')" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Build Release
+        run: cargo build --package uggo --release
+
+      - name: Rename & Prepare Artifacts
+        run: |
+          npm install -g move-file-cli mkdirp
+          mkdirp artifacts
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            move-file target/release/uggo.exe artifacts/uggo-${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.triple }}.exe
+          else
+            move-file target/release/uggo artifacts/uggo-${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.triple }}
+          fi
+        shell: bash
+
+      # Upload file đã build lên GitHub Artifacts để bạn tải về
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: uggo-${{ matrix.os }}
+          path: artifacts/*
