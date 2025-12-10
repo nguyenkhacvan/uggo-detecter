@@ -137,4 +137,12 @@ impl LOLClientAPI {
             rune_page,
         );
     }
+    // crates/lol-client/src/lib.rs
+
+    pub fn get_champ_select_session(&self) -> Option<ChampSelectSession> {
+        self.get_data::<ChampSelectSession>(&format!(
+            "https://127.0.0.1:{}/lol-champ-select/v1/session",
+            self.lockfile.port
+        ))
+    }
 }
