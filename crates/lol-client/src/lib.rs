@@ -1,5 +1,4 @@
 use std::sync::Arc;
-
 use native_tls::TlsConnector;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -33,6 +32,8 @@ impl LOLClientAPI {
         if cfg!(target_os = "linux") {
             return Err(LOLClientError::LinuxNotSupported);
         }
+        // NOTE: danger_accept_invalid_certs is REQUIRED for connecting to LCU (League Client)
+        // because it uses a self-signed certificate.
         Ok(LOLClientAPI {
             agent: AgentBuilder::new()
                 .tls_connector(Arc::new(
@@ -45,18 +46,15 @@ impl LOLClientAPI {
         })
     }
 
+    // Helper: Construct full URL
     fn make_url(&self, endpoint: &str) -> String {
         format!("https://127.0.0.1:{}{}", self.lockfile.port, endpoint)
     }
 
     fn get_data<T: DeserializeOwned>(&self, endpoint: &str) -> Option<T> {
-        match self
-            .agent
+        match self.agent
             .get(&self.make_url(endpoint))
-            .set(
-                "Authorization",
-                &format!("Basic {}", self.lockfile.b64_auth),
-            )
+            .set("Authorization", &format!("Basic {}", self.lockfile.b64_auth))
             .call()
         {
             Ok(response) => {
@@ -71,24 +69,16 @@ impl LOLClientAPI {
     }
 
     fn delete_data(&self, endpoint: &str) {
-        let _ = self
-            .agent
+        let _ = self.agent
             .delete(&self.make_url(endpoint))
-            .set(
-                "Authorization",
-                &format!("Basic {}", self.lockfile.b64_auth),
-            )
+            .set("Authorization", &format!("Basic {}", self.lockfile.b64_auth))
             .call();
     }
 
     fn post_data<T: Serialize>(&self, endpoint: &str, data: &T) {
-        let _ = self
-            .agent
+        let _ = self.agent
             .post(&self.make_url(endpoint))
-            .set(
-                "Authorization",
-                &format!("Basic {}", self.lockfile.b64_auth),
-            )
+            .set("Authorization", &format!("Basic {}", self.lockfile.b64_auth))
             .send_json(data);
     }
 
@@ -99,22 +89,12 @@ impl LOLClientAPI {
 
     #[must_use]
     pub fn get_current_rune_page(&self) -> Option<RunePage> {
-        match self.get_data::<RunePages>("/lol-perks/v1/pages") {
-            Some(data) => {
-                for page in &data {
-                    if page.name.starts_with("uggo:") && page.is_deletable {
-                        return Some(page.clone());
-                    }
-                }
-                for page in &data {
-                    if page.current && page.is_deletable {
-                        return Some(page.clone());
-                    }
-                }
-                None
-            }
-            None => None,
-        }
+        let pages = self.get_data::<RunePages>("/lol-perks/v1/pages")?;
+        // Priority: Find existing uggo page -> Find current active page
+        pages.iter()
+            .find(|p| p.name.starts_with("uggo:") && p.is_deletable)
+            .cloned()
+            .or_else(|| pages.into_iter().find(|p| p.current && p.is_deletable))
     }
 
     pub fn update_rune_page(&self, old_page_id: i64, rune_page: &NewRunePage) {
