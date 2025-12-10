@@ -24,7 +24,7 @@ if %errorlevel% neq 0 (
 
 echo.
 echo ==========================================
-echo        BUILD THANH CONG! (SUCCESS)
+echo        BUILD THANH CONG!
 echo ==========================================
 echo File chay cua ban nam tai: target\release\uggo.exe
 echo.
