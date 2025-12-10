@@ -1,4 +1,3 @@
-// crates/ugg-types/src/client_champ_select.rs
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
