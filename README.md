@@ -1,31 +1,50 @@
-# uggo
+# 🕵️ uggo-detecter
 
-[![version](https://img.shields.io/crates/v/uggo?style=flat-square)](https://crates.io/crates/uggo) [![downloads](https://img.shields.io/crates/d/uggo?style=flat-square)](https://crates.io/crates/uggo)
+> **Tự động nhận diện và hiển thị bảng ngọc, trang bị cho tướng Liên Minh Huyền Thoại.**
 
-TUI to pull builds from https://u.gg/.
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-blue)
+![Language](https://img.shields.io/badge/language-Rust-orange)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Install
+**uggo-detecter** là một bản fork nâng cấp của `uggo` CLI. Phiên bản này tập trung vào tính năng **Auto-Detection** (Tự động nhận diện), giúp bạn không cần phải gõ tên tướng thủ công mỗi khi vào trận.
 
-You can install from [crates.io](https://crates.io/crates/uggo):
+![Demo](assets/usage.gif)
 
-```zsh
-cargo install uggo
-```
+## ✨ Tính năng nổi bật
 
-Or, using `cargo-binstall`:
+* 🤖 **Auto-Detect:** Tự động phát hiện tướng bạn chọn trong màn hình Champ Select (Cấm/Chọn).
+* ⚡ **Siêu nhẹ:** Viết bằng Rust, chạy ngay trên Terminal, không ngốn RAM như các app Electron (Blitz, OP.GG...).
+* 🔄 **Auto-Import:** Tự động đẩy bảng ngọc (Runes) chuẩn từ u.gg vào Client game.
+* 📊 **Đa dạng chế độ:** Hỗ trợ Summoner's Rift (5v5), ARAM, và **Arena**.
 
-```zsh
-cargo binstall uggo
-```
+## 🚀 Cài đặt & Sử dụng
 
-Finally, you can always find the latest release builds in the [Releases](https://github.com/kade-robertson/uggo/releases/latest) tab.
+### 1. Tải về
+Vào mục [Releases](https://github.com/nguyenkhacvan/uggo-detecter/releases) để tải file chạy (`.exe` cho Windows hoặc binary cho macOS) mới nhất.
 
-## Usage
+### 2. Chạy ứng dụng
+1.  Mở **League of Legends Client**.
+2.  Chạy file `uggo.exe`.
+3.  Vào trận và chọn tướng. Ứng dụng sẽ tự động hiển thị bảng ngọc và lên đồ!
 
-### Interactive
+### 3. Phím tắt (Hotkeys)
+* `?`: Hiển thị bảng trợ giúp.
+* `Alt + s`: Tìm kiếm tướng thủ công (nếu cần).
+* `Alt + m`: Đổi chế độ chơi (Normal, ARAM, Arena).
+* `Alt + r`: Đổi vị trí (Top, Mid, Jungle...).
+* `Ctrl + q`: Thoát ứng dụng.
 
-Just run the program.
+## 🛠️ Dành cho Developer
 
-![usage](assets/usage.gif)
+Yêu cầu: `Rust 1.89+`
 
-App controls can be found by pressing ?.
+```bash
+# Clone dự án
+git clone [https://github.com/nguyenkhacvan/uggo-detecter.git](https://github.com/nguyenkhacvan/uggo-detecter.git)
+cd uggo-detecter
+
+# Chạy thử (Debug mode)
+cargo run
+
+# Build bản release (Tối ưu hóa)
+cargo build --release
