@@ -1,11 +1,12 @@
 use std::sync::Arc;
-use ugg_types::client_champ_select::ChampSelectSession;
+
 use native_tls::TlsConnector;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use thiserror::Error;
 use ureq::{Agent, AgentBuilder};
 
+use ugg_types::client_champ_select::ChampSelectSession;
 use ugg_types::client_runepage::{NewRunePage, RunePage, RunePages};
 use ugg_types::client_summoner::ClientSummoner;
 
@@ -137,7 +138,6 @@ impl LOLClientAPI {
             rune_page,
         );
     }
-    // crates/lol-client/src/lib.rs
 
     pub fn get_champ_select_session(&self) -> Option<ChampSelectSession> {
         self.get_data::<ChampSelectSession>(&format!(
