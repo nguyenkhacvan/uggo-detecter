@@ -6,3 +6,4 @@ pub mod mappings;
 pub mod matchups;
 pub mod overview;
 pub mod rune;
+pub mod client_champ_select;
