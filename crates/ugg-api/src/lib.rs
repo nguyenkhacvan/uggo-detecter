@@ -1,3 +1,5 @@
+// File: crates/ugg-api/src/lib.rs
+
 use crate::util::sha256;
 use ddragon::models::Augment;
 use ddragon::models::champions::ChampionShort;
@@ -78,7 +80,8 @@ impl DataApi {
 
         let cache_size = NonZeroUsize::new(50).unwrap_or(NonZeroUsize::MIN);
         Ok(Self {
-            agent: Agent::new_with_defaults(),
+            // SỬA LỖI TẠI ĐÂY: Dùng Agent::new() thay vì Agent::new_with_defaults()
+            agent: Agent::new(),
             ddragon: client_builder.build()?,
             overview_cache: RefCell::new(LruCache::new(cache_size)),
             matchup_cache: RefCell::new(LruCache::new(cache_size)),
