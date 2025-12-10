@@ -78,8 +78,8 @@ impl DataApi {
 
         let cache_size = NonZeroUsize::new(50).unwrap_or(NonZeroUsize::MIN);
         Ok(Self {
-            // [ĐÃ SỬA] Dùng Agent::new() thay vì new_with_defaults()
-            agent: Agent::new(),
+            // [FIX] Sửa lại thành new_with_defaults() như trình biên dịch yêu cầu
+            agent: Agent::new_with_defaults(),
             ddragon: client_builder.build()?,
             overview_cache: RefCell::new(LruCache::new(cache_size)),
             matchup_cache: RefCell::new(LruCache::new(cache_size)),
