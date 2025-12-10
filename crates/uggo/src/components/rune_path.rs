@@ -47,10 +47,11 @@ pub fn make_placeholder() -> impl Widget {
 }
 
 fn make_single_rune_path(
-    grouped_runes: &(String, Vec<&RuneExtended<RuneElement>>),
+    // [FIX] Cập nhật kiểu dữ liệu khớp với util::group_runes
+    grouped_runes: &(String, Vec<(i64, &RuneExtended<RuneElement>)>),
 ) -> impl Widget + use<> {
     Table::new(
-        grouped_runes.1.iter().map(|rune| {
+        grouped_runes.1.iter().map(|(_, rune)| {
             Row::new(vec![
                 Cell::from(Line::from(format_rune_position(rune)).alignment(Alignment::Right)),
                 Cell::from(rune.rune.name.clone()),
@@ -74,8 +75,17 @@ pub fn make(
     runes: &HashMap<i64, RuneExtended<RuneElement>>,
 ) -> [impl Widget; 2] {
     let grouped_runes = util::group_runes(&overview.runes.rune_ids, runes);
-    [
-        make_single_rune_path(&grouped_runes[0]),
-        make_single_rune_path(&grouped_runes[1]),
-    ]
+    
+    // [FIX] Xử lý an toàn: nếu thiếu dữ liệu thì hiển thị bảng rỗng thay vì crash
+    if grouped_runes.len() >= 2 {
+        [
+            make_single_rune_path(&grouped_runes[0]),
+            make_single_rune_path(&grouped_runes[1]),
+        ]
+    } else {
+        [
+            make_single_rune_path(&("Unknown".to_string(), vec![])),
+            make_single_rune_path(&("Unknown".to_string(), vec![])),
+        ]
+    }
 }
