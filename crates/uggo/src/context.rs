@@ -1,3 +1,4 @@
+use std::time::{Duration, Instant};
 use std::collections::HashMap;
 
 #[cfg(debug_assertions)]
