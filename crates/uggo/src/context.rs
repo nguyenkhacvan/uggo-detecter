@@ -38,6 +38,7 @@ pub enum State {
 
 pub struct AppContext<'a> {
     pub api: UggApi,
+    pub last_auto_detect: Instant,
     pub client_api: Option<LOLClientAPI>,
     pub state: State,
     pub show_left_pane: bool,
