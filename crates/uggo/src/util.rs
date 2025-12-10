@@ -1,41 +1,44 @@
-use ugg_types::mappings::{Mode, Region, Role};
-use uggo_ugg_api::UggApi;
+use ddragon::models::runes::RuneElement;
+use std::collections::HashMap;
+use ugg_types::rune::RuneExtended;
 
-// --- PHẦN MỚI: CONSTANTS ---
-pub const AUTO_DETECT_INTERVAL_MS: u64 = 2000;
-pub const LCU_API_URL: &str = "https://127.0.0.1";
+// --- CẤU HÌNH (CONSTANTS) ---
+pub const AUTO_DETECT_INTERVAL_MS: u64 = 2000; // Kiểm tra mỗi 2 giây
 // --------------------------
 
-pub fn sha256(value: &str) -> String {
-    let digest = sha256::digest(value);
-    digest
-}
+pub fn group_runes<'a>(
+    rune_ids: &Vec<i64>,
+    rune_data: &'a HashMap<i64, RuneExtended<RuneElement>>,
+) -> [(String, Vec<&'a RuneExtended<RuneElement>>); 2] {
+    let mut grouped_runes: Vec<(String, Vec<&'a RuneExtended<RuneElement>>)> = Vec::new();
 
-// ... Giữ nguyên các hàm group_runes, generate_perk_array bên dưới ...
-// (Đoạn code dưới đây là phần còn lại của file, bạn giữ nguyên)
-pub fn group_runes(
-    runes: &[i64],
-    rune_data: &std::collections::HashMap<i64, ugg_types::rune::RuneExtended<ugg_types::rune::Rune>>,
-) -> Vec<Vec<i64>> {
-    let mut grouped_runes: Vec<Vec<i64>> = vec![vec![], vec![], vec![]];
-    for rune in runes {
-        if let Some(data) = rune_data.get(rune) {
-            grouped_runes[data.row as usize].push(*rune);
+    for rune in rune_ids {
+        let rune_info = &rune_data[rune];
+        match grouped_runes.iter().position(|r| r.0 == rune_info.parent) {
+            Some(group_index) => grouped_runes[group_index].1.push(rune_info),
+            None => grouped_runes.push((rune_info.parent.to_string(), vec![rune_info])),
         }
     }
-    grouped_runes
+
+    // Make sure primary rune is first
+    if grouped_runes[0].1.len() != 4 {
+        grouped_runes.reverse();
+    }
+
+    for group in &mut grouped_runes {
+        group.1.sort_by(|&a, &b| a.slot.cmp(&b.slot));
+    }
+
+    [grouped_runes[0].to_owned(), grouped_runes[1].to_owned()]
 }
 
 pub fn generate_perk_array(
-    grouped_runes: &[Vec<i64>],
+    runes: &[(String, Vec<&RuneExtended<RuneElement>>)],
     shards: &[i64],
 ) -> (i64, i64, Vec<i64>) {
-    let mut selected_perk_ids = Vec::new();
-    let primary_style_id = -1; 
-    let sub_style_id = -1;
-
-    // Logic này phức tạp, giữ nguyên code cũ của bạn ở đây
-    // Tôi chỉ viết tắt để minh họa vị trí chèn constants
-    // Hãy giữ nguyên nội dung hàm generate_perk_array cũ
-    (primary_style_id, sub_style_id, selected_perk_ids)
+    let mut perk_list: Vec<i64> = Vec::new();
+    perk_list.append(&mut runes[0].1.iter().map(|el| el.rune.id).collect::<Vec<i64>>());
+    perk_list.append(&mut runes[1].1.iter().map(|el| el.rune.id).collect::<Vec<i64>>());
+    perk_list.append(&mut shards.to_vec());
+    (runes[0].1[0].parent_id, runes[1].1[0].parent_id, perk_list)
 }
