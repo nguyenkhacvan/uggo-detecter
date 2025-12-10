@@ -1,3 +1,5 @@
+// File: crates/uggo/src/context.rs
+
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
@@ -205,34 +207,45 @@ impl AppContext<'_> {
         }
         self.last_auto_detect = Instant::now();
 
-        // LOGIC MỚI: Tự động kết nối lại nếu chưa có client_api
+        // Nếu client_api chưa có, thử kết nối lại
         if self.client_api.is_none() {
-            if let Ok(api) = LOLClientAPI::new() {
-                self.client_api = Some(api);
-            }
+            self.client_api = LOLClientAPI::new().ok();
         }
 
-        // Tách phần logic lấy session ra khỏi logic xử lý UI để code thoáng hơn
+        // Kiểm tra xem client có còn sống không bằng cách gọi API nhẹ
+        // Nếu không lấy được session (hoặc lỗi kết nối), ta coi như client chưa sẵn sàng
+        // Logic tách biệt để tránh borrow checker
+        let mut found_champ_id: Option<String> = None;
+
         if let Some(client) = &self.client_api {
             if let Some(session) = client.get_champ_select_session() {
-                // Tìm bản thân
+                // Tìm bản thân trong danh sách team
                 let me = session.my_team.iter().find(|p| p.cell_id == session.local_player_cell_id);
                 
                 if let Some(me) = me {
+                    // champion_id > 0 nghĩa là đã lock hoặc đang hover tướng
                     if me.champion_id > 0 {
-                        let champ_id = me.champion_id.to_string();
-                        self.handle_auto_select_champ(&champ_id);
+                        found_champ_id = Some(me.champion_id.to_string());
                     }
                 }
+            } else {
+                // Nếu gọi API thất bại, có thể Client đã tắt, reset client_api để lần sau init lại
+                // Tuy nhiên, vì LOLClientAPI dùng ureq sync, ta giữ nguyên để nó tự retry lần sau
             }
+        }
+
+        // Thực hiện update UI nếu tìm thấy tướng
+        if let Some(champ_id) = found_champ_id {
+            self.handle_auto_select_champ(&champ_id);
         }
     }
 
     fn handle_auto_select_champ(&mut self, champ_id: &str) {
-        // Kiểm tra xem có cần update không
+        // Kiểm tra xem có cần update không (để tránh render lại liên tục)
         let need_update = self.selected_champ.as_ref().map_or(true, |c| c.key != champ_id);
         
         if need_update {
+            // Tìm tướng trong cache dựa trên Key ID (ví dụ "266" cho Aatrox)
             if let Some(champ) = self.champ_by_key.get(champ_id).cloned() {
                 self.select_champion(&champ);
             }
