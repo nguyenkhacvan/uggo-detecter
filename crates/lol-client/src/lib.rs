@@ -32,21 +32,22 @@ impl LOLClientAPI {
         if cfg!(target_os = "linux") {
             return Err(LOLClientError::LinuxNotSupported);
         }
-        // NOTE: danger_accept_invalid_certs is REQUIRED for connecting to LCU (League Client)
-        // because it uses a self-signed certificate.
+        
+        // SECURITY NOTE: We must accept invalid certs because the League Client (LCU)
+        // uses a self-signed certificate on localhost. This is standard practice for LCU tools.
+        let tls = TlsConnector::builder()
+            .danger_accept_invalid_certs(true) 
+            .build()?;
+
         Ok(LOLClientAPI {
             agent: AgentBuilder::new()
-                .tls_connector(Arc::new(
-                    TlsConnector::builder()
-                        .danger_accept_invalid_certs(true)
-                        .build()?,
-                ))
+                .tls_connector(Arc::new(tls))
                 .build(),
             lockfile: LeagueClientConnector::parse_lockfile()?,
         })
     }
 
-    // Helper: Construct full URL
+    // Helper: Tạo URL chuẩn, tránh lặp code
     fn make_url(&self, endpoint: &str) -> String {
         format!("https://127.0.0.1:{}{}", self.lockfile.port, endpoint)
     }
@@ -90,7 +91,7 @@ impl LOLClientAPI {
     #[must_use]
     pub fn get_current_rune_page(&self) -> Option<RunePage> {
         let pages = self.get_data::<RunePages>("/lol-perks/v1/pages")?;
-        // Priority: Find existing uggo page -> Find current active page
+        // Ưu tiên tìm trang rune của uggo trước
         pages.iter()
             .find(|p| p.name.starts_with("uggo:") && p.is_deletable)
             .cloned()
