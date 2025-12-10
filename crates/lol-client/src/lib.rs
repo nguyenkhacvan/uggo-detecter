@@ -45,10 +45,14 @@ impl LOLClientAPI {
         })
     }
 
-    fn get_data<T: DeserializeOwned>(&self, url: &str) -> Option<T> {
+    fn make_url(&self, endpoint: &str) -> String {
+        format!("https://127.0.0.1:{}{}", self.lockfile.port, endpoint)
+    }
+
+    fn get_data<T: DeserializeOwned>(&self, endpoint: &str) -> Option<T> {
         match self
             .agent
-            .get(url)
+            .get(&self.make_url(endpoint))
             .set(
                 "Authorization",
                 &format!("Basic {}", self.lockfile.b64_auth),
@@ -66,48 +70,36 @@ impl LOLClientAPI {
         }
     }
 
-    fn delete_data(&self, url: &str) {
-        match self
+    fn delete_data(&self, endpoint: &str) {
+        let _ = self
             .agent
-            .delete(url)
+            .delete(&self.make_url(endpoint))
             .set(
                 "Authorization",
                 &format!("Basic {}", self.lockfile.b64_auth),
             )
-            .call()
-        {
-            Err(_) | Ok(_) => (),
-        }
+            .call();
     }
 
-    fn post_data<T: Serialize>(&self, url: &str, data: &T) {
-        match self
+    fn post_data<T: Serialize>(&self, endpoint: &str, data: &T) {
+        let _ = self
             .agent
-            .post(url)
+            .post(&self.make_url(endpoint))
             .set(
                 "Authorization",
                 &format!("Basic {}", self.lockfile.b64_auth),
             )
-            .send_json(data)
-        {
-            Err(_) | Ok(_) => (),
-        }
+            .send_json(data);
     }
 
     #[must_use]
     pub fn get_summoner_info(&self) -> Option<ClientSummoner> {
-        self.get_data::<ClientSummoner>(&format!(
-            "https://127.0.0.1:{}/lol-summoner/v1/current-summoner",
-            self.lockfile.port
-        ))
+        self.get_data::<ClientSummoner>("/lol-summoner/v1/current-summoner")
     }
 
     #[must_use]
     pub fn get_current_rune_page(&self) -> Option<RunePage> {
-        match self.get_data::<RunePages>(&format!(
-            "https://127.0.0.1:{}/lol-perks/v1/pages",
-            self.lockfile.port
-        )) {
+        match self.get_data::<RunePages>("/lol-perks/v1/pages") {
             Some(data) => {
                 for page in &data {
                     if page.name.starts_with("uggo:") && page.is_deletable {
@@ -126,23 +118,11 @@ impl LOLClientAPI {
     }
 
     pub fn update_rune_page(&self, old_page_id: i64, rune_page: &NewRunePage) {
-        self.delete_data(&format!(
-            "https://127.0.0.1:{}/lol-perks/v1/pages/{}",
-            self.lockfile.port, old_page_id
-        ));
-        self.post_data::<NewRunePage>(
-            &format!(
-                "https://127.0.0.1:{}/lol-perks/v1/pages",
-                self.lockfile.port
-            ),
-            rune_page,
-        );
+        self.delete_data(&format!("/lol-perks/v1/pages/{}", old_page_id));
+        self.post_data("/lol-perks/v1/pages", rune_page);
     }
 
     pub fn get_champ_select_session(&self) -> Option<ChampSelectSession> {
-        self.get_data::<ChampSelectSession>(&format!(
-            "https://127.0.0.1:{}/lol-champ-select/v1/session",
-            self.lockfile.port
-        ))
+        self.get_data::<ChampSelectSession>("/lol-champ-select/v1/session")
     }
 }
