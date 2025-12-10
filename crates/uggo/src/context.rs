@@ -1,8 +1,5 @@
-use std::time::{Duration, Instant};
 use std::collections::HashMap;
-
-#[cfg(debug_assertions)]
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use ddragon::models::champions::ChampionShort;
 use ratatui::widgets::ListItem;
@@ -38,7 +35,6 @@ pub enum State {
 
 pub struct AppContext<'a> {
     pub api: UggApi,
-    pub last_auto_detect: Instant,
     pub client_api: Option<LOLClientAPI>,
     pub state: State,
     pub show_left_pane: bool,
@@ -63,6 +59,7 @@ pub struct AppContext<'a> {
     pub build: Build,
     pub build_scroll_pos: Option<usize>,
     pub logger_state: TuiWidgetState,
+    pub last_auto_detect: Instant,
     #[cfg(debug_assertions)]
     pub last_render_duration: Option<Duration>,
 }
@@ -115,6 +112,7 @@ impl AppContext<'_> {
             build: Build::Recommended,
             build_scroll_pos: Build::all().iter().position(|r| r == &Build::Recommended),
             logger_state: TuiWidgetState::default(),
+            last_auto_detect: Instant::now(),
             #[cfg(debug_assertions)]
             last_render_duration: None,
         };
@@ -201,5 +199,29 @@ impl AppContext<'_> {
     #[cfg(debug_assertions)]
     pub fn set_render_duration(&mut self, duration: Duration) {
         self.last_render_duration = Some(duration);
+    }
+
+    pub fn check_champ_select_update(&mut self) {
+        if self.last_auto_detect.elapsed() < Duration::from_secs(2) {
+            return;
+        }
+        self.last_auto_detect = Instant::now();
+
+        if let Some(client) = &self.client_api {
+            if let Some(session) = client.get_champ_select_session() {
+                if let Some(me) = session.my_team.iter().find(|p| p.cell_id == session.local_player_cell_id) {
+                    if me.champion_id > 0 {
+                        let champ_id_str = me.champion_id.to_string();
+                        let is_new_champ = self.selected_champ.as_ref().map_or(true, |c| c.key != champ_id_str);
+
+                        if is_new_champ {
+                            if let Some(champ) = self.champ_by_key.get(&champ_id_str).cloned() {
+                                self.select_champion(&champ);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
