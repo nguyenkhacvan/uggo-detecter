@@ -36,7 +36,8 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Run sccache-cache
-        uses: mozilla-actions/sccache-action@v0.0.4
+        # [QUAN TRỌNG] Cập nhật lên v0.0.9 để sửa lỗi "Server startup failed"
+        uses: mozilla-actions/sccache-action@v0.0.9
 
       # Build bản Release tối ưu
       - name: Build
