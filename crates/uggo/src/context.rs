@@ -205,6 +205,13 @@ impl AppContext<'_> {
         }
         self.last_auto_detect = Instant::now();
 
+        // LOGIC MỚI: Tự động kết nối lại nếu chưa có client_api
+        if self.client_api.is_none() {
+            if let Ok(api) = LOLClientAPI::new() {
+                self.client_api = Some(api);
+            }
+        }
+
         // Tách phần logic lấy session ra khỏi logic xử lý UI để code thoáng hơn
         if let Some(client) = &self.client_api {
             if let Some(session) = client.get_champ_select_session() {
