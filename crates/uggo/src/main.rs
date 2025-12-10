@@ -44,7 +44,7 @@ const HIDE_TARGETS: [&str; 13] = [
 ];
 
 fn main() -> anyhow::Result<()> {
-    tui_logger::init_logger(log::LevelFilter::Trace)?;
+    tui_logger::init_logger(log::LevelFilter::Info)?;
     tui_logger::set_default_level(log::LevelFilter::Trace);
     for target in HIDE_TARGETS {
         tui_logger::set_level_for_target(target, log::LevelFilter::Error);
