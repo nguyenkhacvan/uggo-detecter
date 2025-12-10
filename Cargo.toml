@@ -13,14 +13,10 @@ pedantic = { level = "warn", priority = -1 }
 missing_errors_doc = "allow"
 module_name_repetitions = "allow"
 
-# Tối ưu hóa file binary
+# --- TỐI ƯU HÓA MỚI ---
 [profile.release]
-opt-level = 3           # Tối ưu mã tối đa
-lto = true              # Link Time Optimization (giảm dung lượng, tăng tốc)
-codegen-units = 1       # Giảm đơn vị sinh mã để tối ưu tốt hơn (build lâu hơn chút)
-panic = "abort"         # Giảm dung lượng bằng cách bỏ unwind stack khi crash
-strip = true            # Loại bỏ debug symbols
-
-[profile.release-small]
-inherits = "release"
-opt-level = "z"
+opt-level = 3           # Tối ưu hóa mã nguồn mức cao nhất
+lto = true              # Link Time Optimization: Giảm dung lượng file, tăng tốc độ
+codegen-units = 1       # Giúp trình biên dịch tối ưu tốt hơn (dù build lâu hơn xíu)
+panic = "abort"         # Giảm dung lượng bằng cách bỏ qua unwind stack khi crash
+strip = true            # Loại bỏ thông tin debug không cần thiết
