@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.5.0](https://github.com/nguyenkhacvan/uggo-detecter/compare/uggo-config-v0.4.0...uggo-config-v0.5.0) (2025-12-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* bump msrv to 1.89 ([#485](https://github.com/nguyenkhacvan/uggo-detecter/issues/485))
+* bump msrv to 1.85, edition to 2024, refresh deps ([#437](https://github.com/nguyenkhacvan/uggo-detecter/issues/437))
+* bump msrv to 1.80, node to 20 ([#371](https://github.com/nguyenkhacvan/uggo-detecter/issues/371))
+* rewrite into TUI application ([#258](https://github.com/nguyenkhacvan/uggo-detecter/issues/258))
+
+### Features
+
+* rewrite into TUI application ([#258](https://github.com/nguyenkhacvan/uggo-detecter/issues/258)) ([294aa57](https://github.com/nguyenkhacvan/uggo-detecter/commit/294aa57a0256545ba730c2b9751582bd1afb952f))
+
+
+### Bug Fixes
+
+* **deps:** bump thiserror from 1.0.50 to 1.0.56 ([#286](https://github.com/nguyenkhacvan/uggo-detecter/issues/286)) ([5084787](https://github.com/nguyenkhacvan/uggo-detecter/commit/50847875f6a52c1350cef2c477ef70377c15140c))
+* **deps:** bump thiserror from 1.0.56 to 1.0.58 ([#306](https://github.com/nguyenkhacvan/uggo-detecter/issues/306)) ([f96ab18](https://github.com/nguyenkhacvan/uggo-detecter/commit/f96ab18d88070de5c42f1630b10d3142522a53bf))
+* **deps:** update rust crate thiserror to 1.0.59 ([#334](https://github.com/nguyenkhacvan/uggo-detecter/issues/334)) ([fc07341](https://github.com/nguyenkhacvan/uggo-detecter/commit/fc07341bcaa0e0a9bda64a2985967b04ed5c64de))
+* **deps:** update rust crate thiserror to v2 ([#402](https://github.com/nguyenkhacvan/uggo-detecter/issues/402)) ([5ac4881](https://github.com/nguyenkhacvan/uggo-detecter/commit/5ac4881543dec3af39deeb06217bb648ec4184f7))
+
+
+### Miscellaneous Chores
+
+* bump msrv to 1.89 ([#485](https://github.com/nguyenkhacvan/uggo-detecter/issues/485)) ([de82236](https://github.com/nguyenkhacvan/uggo-detecter/commit/de82236a173aedd48f854f0bd644f62cfb9bf776))
+
+
+### Code Refactoring
+
+* bump msrv to 1.85, edition to 2024, refresh deps ([#437](https://github.com/nguyenkhacvan/uggo-detecter/issues/437)) ([284ef44](https://github.com/nguyenkhacvan/uggo-detecter/commit/284ef44815879548a24b81b4ac64246208fbebae))
+
+
+### Build System
+
+* bump msrv to 1.80, node to 20 ([#371](https://github.com/nguyenkhacvan/uggo-detecter/issues/371)) ([6c161cc](https://github.com/nguyenkhacvan/uggo-detecter/commit/6c161cc626f7030726a6b168b780ade9b9866eb5))
+
 ## [0.4.0](https://github.com/kade-robertson/uggo/compare/uggo-config-v0.3.0...uggo-config-v0.4.0) (2025-08-23)
 
 

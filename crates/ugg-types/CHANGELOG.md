@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.10.0](https://github.com/nguyenkhacvan/uggo-detecter/compare/ugg-types-v0.9.0...ugg-types-v0.10.0) (2025-12-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* bump msrv to 1.89 ([#485](https://github.com/nguyenkhacvan/uggo-detecter/issues/485))
+* initial arena mode support ([#454](https://github.com/nguyenkhacvan/uggo-detecter/issues/454))
+* bump msrv to 1.85, edition to 2024, refresh deps ([#437](https://github.com/nguyenkhacvan/uggo-detecter/issues/437))
+* bump msrv to 1.80, node to 20 ([#371](https://github.com/nguyenkhacvan/uggo-detecter/issues/371))
+* support alternative builds ([#273](https://github.com/nguyenkhacvan/uggo-detecter/issues/273))
+* rewrite into TUI application ([#258](https://github.com/nguyenkhacvan/uggo-detecter/issues/258))
+
+### Features
+
+* initial arena mode support ([#454](https://github.com/nguyenkhacvan/uggo-detecter/issues/454)) ([c737701](https://github.com/nguyenkhacvan/uggo-detecter/commit/c73770130e08c396d97807f0bd00ce273ba6813b))
+* rewrite into TUI application ([#258](https://github.com/nguyenkhacvan/uggo-detecter/issues/258)) ([294aa57](https://github.com/nguyenkhacvan/uggo-detecter/commit/294aa57a0256545ba730c2b9751582bd1afb952f))
+* role and region selection ([#268](https://github.com/nguyenkhacvan/uggo-detecter/issues/268)) ([39e0ad8](https://github.com/nguyenkhacvan/uggo-detecter/commit/39e0ad8ee26cc61faa2f28371ca0f2189c10e153))
+* support alternative builds ([#273](https://github.com/nguyenkhacvan/uggo-detecter/issues/273)) ([c5d4db3](https://github.com/nguyenkhacvan/uggo-detecter/commit/c5d4db3c55994aa6b221b720b0132c9ac02462bd))
+
+
+### Bug Fixes
+
+* add missing role for nexus blitz ([#270](https://github.com/nguyenkhacvan/uggo-detecter/issues/270)) ([f0e2f46](https://github.com/nguyenkhacvan/uggo-detecter/commit/f0e2f469dd81adb0b25e3d5dbaf8bf74d499c037))
+* **deps:** bump serde from 1.0.190 to 1.0.193 ([#257](https://github.com/nguyenkhacvan/uggo-detecter/issues/257)) ([c717cde](https://github.com/nguyenkhacvan/uggo-detecter/commit/c717cde2d0d3f1c26fb3e5df02a27bf65fc2b779))
+* **deps:** bump serde from 1.0.193 to 1.0.194 ([#285](https://github.com/nguyenkhacvan/uggo-detecter/issues/285)) ([de7f42b](https://github.com/nguyenkhacvan/uggo-detecter/commit/de7f42bbe9f09490bd57888d681ea4a24b7bdc6a))
+* **deps:** bump serde from 1.0.194 to 1.0.195 ([#290](https://github.com/nguyenkhacvan/uggo-detecter/issues/290)) ([6fd9ee1](https://github.com/nguyenkhacvan/uggo-detecter/commit/6fd9ee11aa47db8d0931926a78d66901819c0e14))
+* **deps:** bump serde from 1.0.195 to 1.0.197 ([#303](https://github.com/nguyenkhacvan/uggo-detecter/issues/303)) ([79ccfe6](https://github.com/nguyenkhacvan/uggo-detecter/commit/79ccfe67af0538de81e9a75c556bf4d13112f17d))
+* **deps:** update rust crate serde to 1.0.199 ([#337](https://github.com/nguyenkhacvan/uggo-detecter/issues/337)) ([3ea2fa1](https://github.com/nguyenkhacvan/uggo-detecter/commit/3ea2fa1f2a43d9bb0c508f7fae5d07556a352d07))
+* **deps:** update rust crate serde to 1.0.200 ([#338](https://github.com/nguyenkhacvan/uggo-detecter/issues/338)) ([f2724cb](https://github.com/nguyenkhacvan/uggo-detecter/commit/f2724cb2585203449183dc5866b47a762220402b))
+* parse matchups correctly again ([#456](https://github.com/nguyenkhacvan/uggo-detecter/issues/456)) ([a978829](https://github.com/nguyenkhacvan/uggo-detecter/commit/a97882950dcf457a68da98a64c443699a8c65a09))
+* support ME1 region ([#369](https://github.com/nguyenkhacvan/uggo-detecter/issues/369)) ([8051644](https://github.com/nguyenkhacvan/uggo-detecter/commit/805164496cb9fcc1850e5de171a50a8a4413f021))
+
+
+### Miscellaneous Chores
+
+* bump msrv to 1.89 ([#485](https://github.com/nguyenkhacvan/uggo-detecter/issues/485)) ([de82236](https://github.com/nguyenkhacvan/uggo-detecter/commit/de82236a173aedd48f854f0bd644f62cfb9bf776))
+
+
+### Code Refactoring
+
+* bump msrv to 1.85, edition to 2024, refresh deps ([#437](https://github.com/nguyenkhacvan/uggo-detecter/issues/437)) ([284ef44](https://github.com/nguyenkhacvan/uggo-detecter/commit/284ef44815879548a24b81b4ac64246208fbebae))
+
+
+### Build System
+
+* bump msrv to 1.80, node to 20 ([#371](https://github.com/nguyenkhacvan/uggo-detecter/issues/371)) ([6c161cc](https://github.com/nguyenkhacvan/uggo-detecter/commit/6c161cc626f7030726a6b168b780ade9b9866eb5))
+
 ## [0.9.0](https://github.com/kade-robertson/uggo/compare/ugg-types-v0.8.1...ugg-types-v0.9.0) (2025-08-23)
 
 
