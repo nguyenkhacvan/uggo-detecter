@@ -1,0 +1,67 @@
+name: Nightly Release
+
+on:
+  push:
+    branches:
+      - '**' # Chạy trên mọi nhánh (master, main, dev...)
+
+permissions:
+  contents: write # Cấp quyền ghi để tạo/sửa Release
+
+env:
+  SCCACHE_GHA_ENABLED: true
+  RUSTC_WRAPPER: sccache
+
+jobs:
+  build-and-release:
+    name: Build & Release
+    strategy:
+      matrix:
+        # Build cho cả Windows và macOS
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: uggo.exe
+            asset_name: uggo-windows.exe
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: uggo
+            asset_name: uggo-macos
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.4
+
+      # Build bản Release tối ưu
+      - name: Build
+        run: cargo build --package uggo --release
+
+      # Đổi tên file để dễ phân biệt khi upload
+      - name: Prepare Asset
+        shell: bash
+        run: |
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            mv target/release/${{ matrix.artifact_name }} ${{ matrix.asset_name }}
+          else
+            mv target/release/${{ matrix.artifact_name }} ${{ matrix.asset_name }}
+          fi
+
+      # Tự động cập nhật vào Release tên là "nightly"
+      - name: Update Nightly Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: nightly                 # Tên Tag cố định
+          name: Development Build (Nightly) # Tên hiển thị của Release
+          body: |
+            Bản build mới nhất tự động từ mã nguồn.
+            🕒 Thời gian build: ${{ github.event.head_commit.timestamp }}
+            📝 Commit: ${{ github.sha }}
+          files: ${{ matrix.asset_name }}   # Upload file vừa đổi tên
+          prerelease: true                  # Đánh dấu là bản thử nghiệm
+          overwrite: true                   # Ghi đè file cũ
