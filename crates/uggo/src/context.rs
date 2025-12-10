@@ -59,7 +59,10 @@ pub struct AppContext<'a> {
     pub build: Build,
     pub build_scroll_pos: Option<usize>,
     pub logger_state: TuiWidgetState,
+    
+    // Auto-detect timer
     pub last_auto_detect: Instant,
+    
     #[cfg(debug_assertions)]
     pub last_render_duration: Option<Duration>,
 }
@@ -67,22 +70,15 @@ pub struct AppContext<'a> {
 impl AppContext<'_> {
     fn create(api: UggApi) -> Self {
         let version = api.current_version.clone();
-        let version_index = api
-            .allowed_versions
-            .iter()
-            .position(|v| v.ddragon == version);
+        let version_index = api.allowed_versions.iter().position(|v| v.ddragon == version);
 
-        let mut ordered_champ_data = api
-            .champ_data
-            .values()
+        let mut ordered_champ_data = api.champ_data.values()
             .enumerate()
             .map(|(i, c)| (i, c.clone()))
             .collect::<Vec<_>>();
         ordered_champ_data.sort_by(|(_, a), (_, b)| a.name.cmp(&b.name));
 
-        let champ_by_key = api
-            .champ_data
-            .values()
+        let champ_by_key = api.champ_data.values()
             .map(|c| (c.key.clone(), c.clone()))
             .collect::<HashMap<_, _>>();
 
@@ -117,7 +113,6 @@ impl AppContext<'_> {
             last_render_duration: None,
         };
         app_context.update_champ_list();
-
         app_context
     }
 
@@ -137,13 +132,10 @@ impl AppContext<'_> {
     }
 
     pub fn update_champ_list(&mut self) {
-        (self.list_indices, self.champ_list) = self
-            .champ_data
+        (self.list_indices, self.champ_list) = self.champ_data
             .iter()
             .filter(|(_, c)| {
-                c.name
-                    .to_lowercase()
-                    .contains(&self.input.value().to_lowercase())
+                c.name.to_lowercase().contains(&self.input.value().to_lowercase())
             })
             .map(|(i, c)| (i, ListItem::new(c.name.clone())))
             .unzip();
@@ -159,38 +151,42 @@ impl AppContext<'_> {
     pub fn select_champion(&mut self, champ: &ChampionShort) {
         self.champ_scroll_pos = None;
         self.selected_champ = Some(champ.clone());
-        (self.selected_champ_overview, self.selected_champ_role) = self
-            .api
+        
+        // Fetch data
+        (self.selected_champ_overview, self.selected_champ_role) = self.api
             .get_stats(champ, self.role, self.region, self.mode, self.build)
             .ok()
             .transpose();
+
+        // Fetch matchups logic
         if self.mode == Mode::ARAM || self.mode == Mode::Arena {
             self.selected_champ_matchups = None;
         } else {
-            self.selected_champ_matchups = self
-                .api
+            self.selected_champ_matchups = self.api
                 .get_matchups(champ, self.role, self.region, self.mode)
                 .map(|v| v.0)
                 .ok();
         }
 
-        if let Some(Overview::Default(ref overview)) = self.selected_champ_overview
-            && let Some(ref api) = self.client_api
-            && let Some(data) = api.get_current_rune_page()
-        {
-            let (primary_style_id, sub_style_id, selected_perk_ids) = util::generate_perk_array(
-                &util::group_runes(&overview.runes.rune_ids, &self.api.runes),
-                &overview.shards.shard_ids,
-            );
-            api.update_rune_page(
-                data.id,
-                &NewRunePage {
-                    name: format!("uggo: {}, {}", &champ.name, self.mode),
-                    primary_style_id,
-                    sub_style_id,
-                    selected_perk_ids,
-                },
-            );
+        // Auto-push runes logic
+        if let Some(Overview::Default(ref overview)) = self.selected_champ_overview {
+            if let Some(ref api) = self.client_api {
+                if let Some(data) = api.get_current_rune_page() {
+                    let (primary_style_id, sub_style_id, selected_perk_ids) = util::generate_perk_array(
+                        &util::group_runes(&overview.runes.rune_ids, &self.api.runes),
+                        &overview.shards.shard_ids,
+                    );
+                    api.update_rune_page(
+                        data.id,
+                        &NewRunePage {
+                            name: format!("uggo: {}, {}", &champ.name, self.mode),
+                            primary_style_id,
+                            sub_style_id,
+                            selected_perk_ids,
+                        },
+                    );
+                }
+            }
         }
 
         self.state = State::ChampSelected;
@@ -201,17 +197,24 @@ impl AppContext<'_> {
         self.last_render_duration = Some(duration);
     }
 
+    // --- REFACTORED AUTO DETECT ---
     pub fn check_champ_select_update(&mut self) {
+        // Sử dụng constant từ util
         if self.last_auto_detect.elapsed() < Duration::from_millis(util::AUTO_DETECT_INTERVAL_MS) {
             return;
         }
         self.last_auto_detect = Instant::now();
 
+        // Tách phần logic lấy session ra khỏi logic xử lý UI để code thoáng hơn
         if let Some(client) = &self.client_api {
             if let Some(session) = client.get_champ_select_session() {
-                if let Some(me) = session.my_team.iter().find(|p| p.cell_id == session.local_player_cell_id) {
+                // Tìm bản thân
+                let me = session.my_team.iter().find(|p| p.cell_id == session.local_player_cell_id);
+                
+                if let Some(me) = me {
                     if me.champion_id > 0 {
-                        self.handle_auto_select_champ(&me.champion_id.to_string());
+                        let champ_id = me.champion_id.to_string();
+                        self.handle_auto_select_champ(&champ_id);
                     }
                 }
             }
@@ -219,8 +222,10 @@ impl AppContext<'_> {
     }
 
     fn handle_auto_select_champ(&mut self, champ_id: &str) {
-        let is_new_champ = self.selected_champ.as_ref().map_or(true, |c| c.key != champ_id);
-        if is_new_champ {
+        // Kiểm tra xem có cần update không
+        let need_update = self.selected_champ.as_ref().map_or(true, |c| c.key != champ_id);
+        
+        if need_update {
             if let Some(champ) = self.champ_by_key.get(champ_id).cloned() {
                 self.select_champion(&champ);
             }
