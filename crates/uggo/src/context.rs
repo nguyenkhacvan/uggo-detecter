@@ -202,7 +202,7 @@ impl AppContext<'_> {
     }
 
     pub fn check_champ_select_update(&mut self) {
-        if self.last_auto_detect.elapsed() < Duration::from_secs(2) {
+        if self.last_auto_detect.elapsed() < Duration::from_millis(util::AUTO_DETECT_INTERVAL_MS) {
             return;
         }
         self.last_auto_detect = Instant::now();
@@ -211,16 +211,18 @@ impl AppContext<'_> {
             if let Some(session) = client.get_champ_select_session() {
                 if let Some(me) = session.my_team.iter().find(|p| p.cell_id == session.local_player_cell_id) {
                     if me.champion_id > 0 {
-                        let champ_id_str = me.champion_id.to_string();
-                        let is_new_champ = self.selected_champ.as_ref().map_or(true, |c| c.key != champ_id_str);
-
-                        if is_new_champ {
-                            if let Some(champ) = self.champ_by_key.get(&champ_id_str).cloned() {
-                                self.select_champion(&champ);
-                            }
-                        }
+                        self.handle_auto_select_champ(&me.champion_id.to_string());
                     }
                 }
+            }
+        }
+    }
+
+    fn handle_auto_select_champ(&mut self, champ_id: &str) {
+        let is_new_champ = self.selected_champ.as_ref().map_or(true, |c| c.key != champ_id);
+        if is_new_champ {
+            if let Some(champ) = self.champ_by_key.get(champ_id).cloned() {
+                self.select_champion(&champ);
             }
         }
     }
