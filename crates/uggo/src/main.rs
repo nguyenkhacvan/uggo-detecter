@@ -60,6 +60,8 @@ fn main() -> anyhow::Result<()> {
         #[cfg(debug_assertions)]
         let start_render = Instant::now();
 
+        app_context.check_champ_select_update();
+
         terminal.draw(|frame| ui::render(frame, &app_context))?;
 
         #[cfg(debug_assertions)]
